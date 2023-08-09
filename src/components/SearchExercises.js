@@ -2,16 +2,35 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 
 import { exerxiseOptions, fetchData } from '../utils/fetchData';
-
+import HorizontalScrollbar from './HorizontalScrollbar';
 
 const SearchExercises = () => {
-  
-  const [ search, setSearch ] = useState('')
 
-  const handleSearch = async() => {
-    if(search) {
+  const [search, setSearch] = useState('');
+  const [exercises, setExercises] = useState([]);
+  const [bodyParts, setBodyParts] = useState([]);
+
+  useEffect(() => {
+    const fetchExercisesData = async () => {
+      const bodyPartsData = await fetchData('https://exercisedb.p.rapidapi.com/exercise/bodyPartList', exerxiseOptions);
+      setBodyParts(['all', ...bodyPartsData]);
+    }
+
+    fetchExercisesData();
+    }, [])
+  
+
+  const handleSearch = async () => {
+    if (search) {
       const exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerxiseOptions);
-      console.log(exercisesData);
+      const searchedExercises = exercisesData.filter(
+        exercise => exercise.name.toLowerCase().includes(search)
+          || exercise.target.toLowerCase().includes(search)
+          || exercise.equiment.toLowerCase().includes(search)
+          || exercise.bodyPart.toLowerCase().includes(search));
+          
+          setSearch('');
+          setExercises(searchedExercises);
     }
   }
 
@@ -36,7 +55,7 @@ const SearchExercises = () => {
               border: 'none',
               borderRadius: '4px'
             },
-            width: { lg: '800px', xs: '350px'},
+            width: { lg: '800px', xs: '350px' },
             backgroundColor: '#FFFFFF',
             borderRadius: '40px'
           }}
@@ -51,8 +70,8 @@ const SearchExercises = () => {
             bgcolor: '#FF2625',
             color: '#fff',
             textTransform: 'none',
-            width: { lg: '175px', xs: '80px'},
-            fontSize: { lg: '20px', xs: '14px'},
+            width: { lg: '175px', xs: '80px' },
+            fontSize: { lg: '20px', xs: '14px' },
             height: '56px',
             position: 'absolute',
             right: '0'
@@ -61,6 +80,15 @@ const SearchExercises = () => {
         >
           Search
         </Button>
+      </Box>
+      <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        p: '20px'
+      }}
+      >
+        <HorizontalScrollbar data={bodyParts} />
       </Box>
     </Stack>
   )
